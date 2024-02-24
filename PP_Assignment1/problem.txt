@@ -1,0 +1,18 @@
+ContainerSize:
+150
+Items:
+E 26 55
+I 85 33
+C 33 6
+Q 37 43
+M 50 86
+X 73 23
+F 80 65
+V 34 77
+Y 31 40
+S 10 87
+Rules:
+SV 1 38
+MS 6 36
+EX 9 3
+MX 1 18
