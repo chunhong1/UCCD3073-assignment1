@@ -1,46 +1,42 @@
-#include	<iostream>
-#include	<cstdlib>
-#include	<cstdio>
-#include    <fstream>
-#include    <string>
-#include    <sstream>
-#include    <iomanip>
-//#include	"Item.h"
+#include <iostream>
+#include <fstream>
 #include <vector>
 
 using namespace std;
 
-struct Item {
+struct Item 
+{
     char name;
     int weight;
     int value;
 };
 
-struct Rule {
+struct Rule 
+{
     string combinedItems;
     int extraWeight;
     int bonusValue;
 };
+
 //constant
 const string FILENAME = "problem.txt";
 
-bool ReadFile(string filename, int& containerSize, vector<Item>& item, vector<Rule> rule) {
+/* This function reads the file and store the relevant data into containerSize, items and rules */
+bool ReadFile(string filename, int& containerSize, vector<Item>& item, vector<Rule> rule) 
+{
 
     ifstream in;
-
-    char text[256];
-    char name;
-    int weight, value, extraWeight, bonusValue;
-    string combination;
-    //string line;
-
     in.open(filename);
 
     //return false if the file is not found
     if (!in)
         return false;
 
-    
+    char text[256];
+    char name;
+    int weight, value, extraWeight, bonusValue;
+    string combination;
+
     while (!in.eof())
     {
         in >> text; //ignore "ContainerSize:"
@@ -55,29 +51,17 @@ bool ReadFile(string filename, int& containerSize, vector<Item>& item, vector<Ru
 
             item.push_back({ name, weight, value });
         }
-        
-        
-        for (auto i : item) {
-            cout << i.name << "\t" << i.weight << "\t" << i.value << endl; 
-        }
-        
-
+               
         //clear buffer as the Rules keyword will cause weight become 'u'
-        in.ignore(1000, '\n');
         in.clear();
 
         in >> text;
 
+        //push the rules into a dynamic array
         while (in >> combination >> extraWeight >> bonusValue) 
         {
             rule.push_back({ combination, extraWeight, bonusValue });
-        }
-
-        
-        for (auto i : rule) {
-            cout << i.combinedItems << "\t" << i.extraWeight << "\t" << i.bonusValue << endl; 
-        }
-        
+        }  
 
         break;
     }
@@ -86,16 +70,23 @@ bool ReadFile(string filename, int& containerSize, vector<Item>& item, vector<Ru
     return true;
 }
 
-vector<Item> knapsack(int containerSize, const vector<Item>& items, const vector<Rule>& rules) {
+/* This function takes the input specifications and 
+ * return the combination of items that maximize the total value without exceeding the container capacity
+ */
+vector<Item> Knapsack(int containerSize, const vector<Item>& items, const vector<Rule>& rules) 
+{
     int n = items.size();
-    vector<vector<int>> dp(n + 1, vector<int>(containerSize + 1,0)); //2d matrix, size of (n + 1) x (containerSize + 1)
+    vector<vector<int>> dp(n + 1, vector<int>(containerSize + 1,0)); //2d matrix, size of (n + 1) x (containerSize + 1) and initialise to 0
 
     //knapsack algorithm
     for (int i = 1; i <= n; ++i) {
         for (int w = 0; w <= containerSize; ++w) {
+            //assign weight and value of the current item
             int itemWeight = items[i - 1].weight;
             int itemValue = items[i - 1].value;
 
+            //update the value by choosing the maximum value of not including the item or including the item 
+            //if there is enough capacity
             dp[i][w] = dp[i - 1][w];
 
             if (w >= itemWeight) {
@@ -108,6 +99,7 @@ vector<Item> knapsack(int containerSize, const vector<Item>& items, const vector
     int i = n;
     int w = containerSize;
 
+    //select item
     while (i > 0 && w > 0) {
         if (dp[i][w] != dp[i - 1][w])
         {
@@ -117,40 +109,14 @@ vector<Item> knapsack(int containerSize, const vector<Item>& items, const vector
         i--;
     }
 
-    
-
+    //reverse the order
     reverse(selectedItems.begin(), selectedItems.end());
 
-    //check for same weight different value
-
-    
-    // Apply rules for combining items
-    /*
-    for (const Rule& rule : rules) {
-        string combinedItemName = rule.combinedItems;
-        auto it = find_if(selectedItems.begin(), selectedItems.end(),
-            [combinedItemName](const Item& item) {
-                return item.name == combinedItemName[0];
-            });
-
-        if (it != selectedItems.end()) {
-            selectedItems.erase(it);
-            selectedItems.push_back({ combinedItemName[0], rule.combinedWeight, rule.combinedValue });
-            it = find_if(selectedItems.begin(), selectedItems.end(),
-                [combinedItemName](const Item& item) {
-                    return item.name == combinedItemName[1];
-                });
-
-            if (it != selectedItems.end()) {
-                selectedItems.erase(it);
-            }
-        }
-    }
-    */
     return selectedItems;
 }
 
-void writeFile(vector<Item>& selectedItems)
+/* This function write the selected item into output.txt */
+void WriteFile(vector<Item>& selectedItems)
 {
     ofstream myfile;
     myfile.open("output.txt");
@@ -168,18 +134,14 @@ int main()
     vector<Item> items;
     vector<Rule> rules;
 
+    //return -1 if file is not found
     if (!ReadFile(FILENAME,containerSize,items,rules))
-    {
         return -1;
-    }
 
-
-    vector<Item> selectedItems = knapsack(containerSize, items, rules);
-    for (int i = 0; i < selectedItems.size(); i++) {
-        cout << selectedItems[i].name << endl;
-    }
+    vector<Item> selectedItems = Knapsack(containerSize, items, rules);
     
-    writeFile(selectedItems);
+    WriteFile(selectedItems);
+
 	return 0;
 }
 
