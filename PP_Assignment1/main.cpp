@@ -75,11 +75,11 @@ bool ReadFile(string filename, int& containerSize, vector<Item>& item, vector<Ru
  */
 vector<Item> Knapsack(int containerSize, const vector<Item>& items, const vector<Rule>& rules) 
 {
-    int n = items.size();
-    vector<vector<int>> dp(n + 1, vector<int>(containerSize + 1,0)); //2d matrix, size of (n + 1) x (containerSize + 1) and initialise to 0
+    int itemSize = items.size();
+    vector<vector<int>> dp(itemSize + 1, vector<int>(containerSize + 1,0)); //2d matrix, size of (n + 1) x (containerSize + 1) and initialise to 0
 
     //knapsack algorithm
-    for (int i = 1; i <= n; ++i) {
+    for (int i = 1; i <= itemSize; ++i) {
         for (int w = 0; w <= containerSize; ++w) {
             //assign weight and value of the current item
             int itemWeight = items[i - 1].weight;
@@ -96,17 +96,16 @@ vector<Item> Knapsack(int containerSize, const vector<Item>& items, const vector
     }
 
     vector<Item> selectedItems;
-    int i = n;
-    int w = containerSize;
+    int capacity = containerSize;
 
     //select item
-    while (i > 0 && w > 0) {
-        if (dp[i][w] != dp[i - 1][w])
+    while (itemSize > 0 && capacity > 0) {
+        if (dp[itemSize][capacity] != dp[itemSize - 1][capacity])
         {
-            selectedItems.push_back(items[i - 1]);
-            w -= items[i - 1].weight;
+            selectedItems.push_back(items[itemSize - 1]);
+            capacity -= items[itemSize - 1].weight;
         }
-        i--;
+        itemSize--;
     }
 
     //reverse the order
