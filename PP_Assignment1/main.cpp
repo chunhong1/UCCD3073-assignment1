@@ -115,7 +115,7 @@ vector<Item> Knapsack(int containerSize,  vector<Item>& items, const vector<Rule
             else 
             {
                 //check the following selected item have common letter with the items in selectedItems
-                //if found, then mark the item status as true
+                //if found, then mark the item found as true
                 for (int i = 0; i < selectedItems.size(); i++) 
                 {
                     string selectName = selectedItems[i].name;
@@ -205,9 +205,8 @@ vector<Item> Knapsack(int containerSize,  vector<Item>& items, const vector<Rule
                                 break;
                             }
                         }
-
-
                     }
+
                     if (!found) 
                     {
                         selectedItems.push_back(leftItem[k - 1]);
@@ -224,6 +223,7 @@ vector<Item> Knapsack(int containerSize,  vector<Item>& items, const vector<Rule
     return selectedItems;
 }
 
+/* This function is a normal 01 knapsack algorithm */
 vector<Item> Knapsack2(int containerSize, vector<Item>& items, const vector<Rule>& rules)
 {
     int itemSize = items.size();
@@ -281,6 +281,19 @@ void WriteFile(vector<Item>& selectedItems)
     myfile.close();
 }
 
+/* This function calculate the total value of selected items and return it */
+int CalculateTotalValue(vector<Item>& item)
+{
+    int value = 0;
+
+    for (auto& it : item)
+    {
+        value += it.value;
+    }
+
+    return value;
+}
+
 int main()
 {
     SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
@@ -288,8 +301,7 @@ int main()
     //items consist of items and rules while items2 consist of items only
     vector<Item> items,items2;
     vector<Rule> rules;
-    int weight1 = 0, weight2 = 0;
-    int sum1 = 0, sum2 = 0;
+    int value1 = 0, value2 = 0;
 
     //return -1 if file is not found
     if (!ReadFile(FILENAME, containerSize, items, rules,items2))
@@ -320,22 +332,12 @@ int main()
     vector<Item> selectedItems = Knapsack(containerSize, items, rules);
     vector<Item> selectedItems2 = Knapsack2(containerSize, items2, rules);
     
-    for (auto& it : selectedItems) 
-    {
-        weight1 += it.weight;
-        sum1 += it.value;
-
-    }
-
-    for (auto& it : selectedItems2) 
-    {
-        weight2 += it.weight;
-        sum2 += it.value;
-    }
-
     
+    value1 = CalculateTotalValue(selectedItems);
+    value2 = CalculateTotalValue(selectedItems2);
+
     //compare items or items2 has a larger profit and write into output.txt
-    if (sum2 >= sum1)
+    if (value2 >= value1)
     {
         WriteFile(selectedItems2);
     }
