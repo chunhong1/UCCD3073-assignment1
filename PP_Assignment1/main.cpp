@@ -71,7 +71,7 @@ bool ReadFile(string filename, int& containerSize, vector<Item>& item, vector<Ru
 /* This function takes the input specifications and
  * return the combination of items that maximize the total value without exceeding the container capacity
  */
-vector<Item> Knapsack(int containerSize,  vector<Item>& items, const vector<Rule>& rules)
+vector<Item> Knapsack(int containerSize,  vector<Item>& items)
 {
     int itemSize = items.size();
 
@@ -224,7 +224,7 @@ vector<Item> Knapsack(int containerSize,  vector<Item>& items, const vector<Rule
 }
 
 /* This function is a normal 01 knapsack algorithm */
-vector<Item> Knapsack2(int containerSize, vector<Item>& items, const vector<Rule>& rules)
+vector<Item> Knapsack2(int containerSize, vector<Item>& items)
 {
     int itemSize = items.size();
     vector<vector<int>> dp(itemSize + 1, vector<int>(containerSize + 1, 0)); //2d matrix, size of (n + 1) x (containerSize + 1) and initialise to 0
@@ -329,8 +329,8 @@ int main()
         items.push_back({ name, sumWeight, sumValue });
     }
     
-    vector<Item> selectedItems = Knapsack(containerSize, items, rules);
-    vector<Item> selectedItems2 = Knapsack2(containerSize, items2, rules);
+    vector<Item> selectedItems = Knapsack(containerSize, items);
+    vector<Item> selectedItems2 = Knapsack2(containerSize, items2);
     
     
     value1 = CalculateTotalValue(selectedItems);
