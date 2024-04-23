@@ -4,6 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <omp.h>
+#include <Windows.h>
 
 using namespace std;
 
@@ -112,13 +113,13 @@ void GenerateItemCombinations(vector<vector<Item>>& combinations, const vector<I
 }
 
 // Function to solve the knapsack problem using dynamic programming
-void knapsack_algorithm(int containerSize, const std::vector<Item>& items, std::vector<std::vector<int>>& dp) {
+void KnapsackAlgorithm(int containerSize, const std::vector<Item>& items, std::vector<std::vector<int>>& dp) 
+{
     // Parallel loop for each item
     int itemSize = items.size();
 
     for (int i = 1; i <= itemSize; ++i)
     {
-        #pragma omp parallel for
         for (int w = 0; w <= containerSize; ++w)
         {
             //assign weight and value of the current item
@@ -139,7 +140,8 @@ void knapsack_algorithm(int containerSize, const std::vector<Item>& items, std::
 }
 
 // Function to select items based on knapsack solution
-void itemSelection(int itemSize, int& capacity, vector<Item>& items, vector<vector<int>>& dp, vector<Item>& selectedItems) {
+void ItemSelection(int itemSize, int& capacity, vector<Item>& items, vector<vector<int>>& dp, vector<Item>& selectedItems) 
+{
     while (itemSize > 0 && capacity > 0)
     {
         if (dp[itemSize][capacity] != dp[itemSize - 1][capacity])
@@ -193,13 +195,13 @@ vector<Item> Knapsack(int containerSize, vector<Item>& items)
     vector<vector<int>> dp(itemSize + 1, vector<int>(containerSize + 1, 0));
 
     //knapsack algorithm
-    knapsack_algorithm(containerSize, items, dp);
+    KnapsackAlgorithm(containerSize, items, dp);
 
     vector<Item> selectedItems;
     int capacity = containerSize;
 
     //select item
-    itemSelection(itemSize, capacity, items, dp, selectedItems);
+    ItemSelection(itemSize, capacity, items, dp, selectedItems);
 
     return selectedItems;
 }
@@ -222,8 +224,9 @@ void WriteFile(const vector<Item>& selectedItems)
     }
 }
 
-int main() {
-    clock_t start = clock();
+int main() 
+{
+    SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
     int containerSize = 0;
     vector<Item> items;
     vector<Rule> rules;
@@ -248,7 +251,7 @@ int main() {
     vector<Item> bestItems;
 
     // Find the best combination using knapsack algorithm
-    #pragma omp parallel for shared(maxValue, bestItems)
+    #pragma omp parallel for schedule(dynamic,1) shared(maxValue, bestItems)
     for (int i = 0; i < itemCombinations.size(); ++i) 
     {
         auto& combination = itemCombinations[i];
@@ -270,12 +273,7 @@ int main() {
         }
     }
 
-
-    for (auto& i : bestItems) {
-        cout << i.name << "\t" << i.value << "\t" << i.weight << endl;
-    }
     WriteFile(bestItems);
-    clock_t stop = clock();
-   printf(" %f \n", ((double)stop - start) / CLOCKS_PER_SEC);
+
     return 0;
 }
